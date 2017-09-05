@@ -1,8 +1,10 @@
 const puppeteer = require('puppeteer');
+const util = require('util');
 
 (async () => {
   const browser = await puppeteer.launch({
-      headless: false
+      headless: false,
+      slowMo: 500
   });
   const page = await browser.newPage();
   await page.goto('http://www.my-gurukul.com/login.aspx?BROWSERWINDOW=&BROWSER=FF&DF=MM/DD/YYYY&CF=MYGURUKUL&SID=1022');
@@ -22,14 +24,25 @@ const puppeteer = require('puppeteer');
   await page.click(loginselector);
   
   await page.waitForNavigation();
-
-//   const attselector = '#submenuIconDiv > table > tbody > tr:nth-child(2) > td:nth-child(5)';
-//   await page.waitForSelector(attselector);
-//   await page.click(attselector);
-//   await page.waitForNavigation();
-  let url = 'http://www.my-gurukul.com/frmAcaViewInfo.aspx?kmlm=066057043042059065066062064050';
-  await page.goto(url);
-  await page.waitFor(5*1000);
-  await page.screenshot({path: 'example.png'});
+  //await page.waitFor('#imgid_12');
+ 
+ // await page.click(attselector);
+  //await page.waitForNavigation();
+  var frames = await page.frames();
+  //f   rames = util.inspect(frames);
+//   frames.map((frame) => {
+//     frame = util.inspect(frame);  
+//     //console.log(JSON.stringify(frame,null,'\t'));
+//     console.log(frame);
+//     console.log('\n');
+//     });
+   var myframe = frames.find(f => f.name() === 'mygurukuliframe_submenu'); 
+   const attselector = '#imgid_12';
+   const attel = await myframe.$(attselector);
+   const outerHTML = await attel.evaluate(e => e.parentNode.outerHTML);
+   console.log('the outerhtml: ', outerHTML);
+    await attel.click({button:'middle'});
+    await page.waitForNavigation();
+   await page.screenshot({path : 'example.png'});
   browser.close();
 })();
